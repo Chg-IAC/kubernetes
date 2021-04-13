@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    #kubernetes.io/ingress.class: nginx
+  name: nginx-ingress
+  namespace: kube-system
+spec:
+  rules:
+  - host: livestreaming.com
+    http:
+      paths:
+        - path: /dasboard
+          backend:
+            serviceName: k8dash
+            servicePort: 32349
+

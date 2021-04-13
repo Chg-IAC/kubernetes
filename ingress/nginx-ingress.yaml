@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    #kubernetes.io/ingress.class: nginx
+  name: nginx-ingress
+spec:
+  rules:
+  - host: livestreaming.com
+    http:
+      paths:
+        - path: /stream
+          backend:
+            serviceName: hellok8s-deployment
+            servicePort: 80
+

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: parnsweb01ap
+  labels:
+    version: "0.1"
+    region: paris
+    service: webstreaming
+    environnement: production
+  resourceVersion: "1504828"
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active
+
