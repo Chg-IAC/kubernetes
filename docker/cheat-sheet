@@ -1,0 +1,175 @@
+# suppression des anciennes versions
+apt-get remove docker docker-engine docker.io containerd runc
+# installation des nouveaux packages docker (sous ubuntu)
+
+sudo apt-get update
+
+ sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+	
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+sudo add-apt-repository \
+   "deb https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+   
+   
+sudo apt-get update
+ sudo apt-get install docker-ce docker-ce-cli containerd.io
+ 
+
+# Se connecter en root ou passer toutes les commandes suivantes en sudo
+su -
+
+
+# Lister les images:
+docker images 
+
+# Installer l'image "hello-world:latest"
+docker run hello-world:latest
+
+
+# Recuperer et installer Nginx par exemple
+docker pull nginx
+docker run nginx
+
+
+# Lancer un ou plusieurs conteneurs avec un shell actif (par exemple Ubuntu , bash)
+docker run --name ubuntu -i -t ubuntu bash
+
+
+# Vérifier si les containers sont isolés ou non
+# pour cela creer un fichier dans le systeme de fichier hote 
+touch /tmp/Monfichiertest.txt
+
+# lancer le container :
+docker run --name ubuntu -i -t ubuntu bash
+
+# et verifier que le fichier n'EXISTE PAS :
+ls  /tmp/Monfichiertest.txt
+
+# Installer une version alternative d'une image
+docker image pull debian:testing
+docker image pull debian:latest
+
+# Supprimer une image:
+# Attention vous ne pouvez supprimer qu'une image quand il n'ya pas de container actif!
+docker image rm debian:testing
+
+
+# Arreter un container
+docker stop IDCOntainer
+
+# Suppprimer un container etaint
+docker rm IDCOntainer
+
+# Lancer un container
+docker start IDCOntainer
+
+
+# Arreter tous les containers:
+docker container stop $(docker container ls -aq)
+
+# Supprimer tous les containers eteints
+docker container rm $(docker container ls -aq)
+	
+
+# Partie 2
+#  Créer un volume nommer "VolContainer1"
+ docker volume create VolContainer1
+ 
+# Lancer et attacher un container avec un volume :
+docker run -it --name "Mycontainer1" -v VolContainer1:/mnt/myContainer1 ubuntu bash
+
+#dans le container 1 , créer un fichier dans le point de montage:
+echo "Ceci est mon fichier de test" > /mnt/myContainer1/test1.txt
+
+
+# Dans un second Shell lancer un autre container (avec le meme volume monte)
+docker run -it --name "Mycontainer2" -v VolContainer1:/mnt/myContainer1 ubuntu bash
+
+# Verifier que le fichier existe : 
+ls /mnt/myContainer1
+
+# lire le fichier
+cat /mnt/myContainer1/test1.txt
+
+#C'est bien le meme fichier ! 
+# On peut faire l'inverse:
+touch /mnt/myContainer1/file2.txt
+
+# et dans l'autre container , lister:
+ls /mnt/myContainer1/
+
+
+# Partie 3 le reseau
+
+# cree un nouveau sous reseau
+docker network ls
+
+docker network create mybridge3 --driver bridge
+
+# verifier les parametres
+docker network inspect mybridge3
+
+# Lancer un premier container avec le nouveau sous reseau:
+ docker run -i -t --network mybridge3 debian bash
+
+# Verifier l'ip
+ip a
+
+# Lancer un Second container avec le nouveau sous reseau (dans un autre terminal):
+docker run -i -t --network mybridge2 debian bash
+
+ip a
+
+ping IP_autreContainer
+# La communication fonctionne !
+
+
+# Partie 4 Docker Compose
+################## Debut fichier docker-compose.yml
+#docker-compose a renommer en version docker-compose.ymlversion
+version: "3"
+services:
+  webserver:
+    image: nginx
+    container_name: "webserver"
+    restart: unless-stopped
+    tty: true
+    volumes:
+    - "VolContainer1:/VolContainer1"
+    ports:
+      - "80:80"
+      - "443:443"
+
+
+
+  webserver2:
+    image: nginx
+    container_name: "webserver2"
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "81:81"
+      - "444:444"
+
+
+volumes:
+    VolContainer1:
+networks:
+  default:
+    external:
+      name: myNetwork
+      
+################## fin fichier docker-compose.yml
+
+
+
+
+
